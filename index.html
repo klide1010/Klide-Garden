@@ -1,0 +1,1907 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#2d5016">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Il Mio Giardino">
+<link rel="manifest" href="manifest.json">
+<title>Il Mio Giardino 🌿</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green-deep: #1a3a08;
+    --green-mid: #2d5016;
+    --green-soft: #4a7c2f;
+    --green-light: #7eb356;
+    --green-pale: #c8e6a0;
+    --cream: #f5f0e8;
+    --warm-white: #faf8f3;
+    --earth: #8b6914;
+    --earth-light: #c4972a;
+    --terracotta: #c1440e;
+    --terracotta-light: #e8724a;
+    --text-dark: #1c2410;
+    --text-mid: #3d5022;
+    --text-light: #6b8042;
+    --shadow: rgba(26,58,8,0.15);
+    --card-bg: rgba(255,255,255,0.85);
+    --radius: 18px;
+    --radius-sm: 10px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text-dark);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 0%, rgba(126,179,86,0.18) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 100%, rgba(45,80,22,0.12) 0%, transparent 60%),
+      url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%234a7c2f' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* HEADER */
+  .app-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--green-deep);
+    color: white;
+    padding: 0 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 62px;
+  }
+
+  .header-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-style: italic;
+    color: var(--green-pale);
+    letter-spacing: 0.02em;
+  }
+
+  .header-season {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.1);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 500;
+  }
+
+  /* NAV */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0; right: 0;
+    z-index: 100;
+    background: var(--green-deep);
+    display: flex;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 10px 4px 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    background: none;
+    color: rgba(255,255,255,0.45);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+
+  .nav-item.active {
+    color: var(--green-pale);
+  }
+
+  .nav-item .nav-icon {
+    font-size: 1.35rem;
+    line-height: 1;
+  }
+
+  /* MAIN CONTENT */
+  .main-content {
+    position: relative;
+    z-index: 1;
+    padding: 20px 16px 100px;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* SECTION TITLE */
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.55rem;
+    color: #1c2410;
+    margin-bottom: 6px;
+    font-style: italic;
+  }
+
+  .section-sub {
+    font-size: 0.85rem;
+    color: #4a5e2a;
+    margin-bottom: 20px;
+    font-weight: 400;
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 16px var(--shadow), 0 0 0 1px rgba(255,255,255,0.6) inset;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .card:active { transform: scale(0.98); }
+
+  /* PLANT CARD */
+  .plant-card {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    cursor: pointer;
+  }
+
+  .plant-emoji {
+    font-size: 2.4rem;
+    width: 54px;
+    height: 54px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--green-pale), rgba(200,230,160,0.4));
+    border-radius: 14px;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(74,124,47,0.2);
+  }
+
+  .plant-info { flex: 1; min-width: 0; }
+
+  .plant-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    color: var(--green-deep);
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+
+  .plant-type-badge {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-bottom: 6px;
+  }
+
+  .badge-aromatic { background: rgba(126,179,86,0.2); color: var(--green-soft); }
+  .badge-fruit { background: rgba(196,151,42,0.2); color: var(--earth); }
+  .badge-flower { background: rgba(193,68,14,0.15); color: var(--terracotta); }
+  .badge-veggie { background: rgba(45,80,22,0.15); color: var(--green-mid); }
+
+  .plant-watering {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .plant-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-end;
+  }
+
+  .btn-water {
+    background: linear-gradient(135deg, #5ba3d9, #3a7fb8);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 0.75rem;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(91,163,217,0.35);
+  }
+
+  .btn-harvest {
+    background: linear-gradient(135deg, var(--earth-light), var(--earth));
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 0.75rem;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(196,151,42,0.35);
+  }
+
+  /* SEASON ADVICE */
+  .season-banner {
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    margin-bottom: 16px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .season-banner::before {
+    content: attr(data-icon);
+    position: absolute;
+    right: -10px;
+    top: -10px;
+    font-size: 5rem;
+    opacity: 0.18;
+    line-height: 1;
+  }
+
+  .season-spring { background: linear-gradient(135deg, #4a9b4e, #7eb356); }
+  .season-summer { background: linear-gradient(135deg, #c4972a, #e8b84b); }
+  .season-autumn { background: linear-gradient(135deg, #c1440e, #d96b2f); }
+  .season-winter { background: linear-gradient(135deg, #2d5a8e, #4a7fb8); }
+
+  .season-banner h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-style: italic;
+    margin-bottom: 6px;
+  }
+
+  .season-banner p { font-size: 0.85rem; opacity: 0.9; line-height: 1.5; }
+
+  /* STATS GRID */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .stat-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    border-radius: var(--radius);
+    padding: 16px;
+    text-align: center;
+    box-shadow: 0 2px 12px var(--shadow), 0 0 0 1px rgba(255,255,255,0.6) inset;
+  }
+
+  .stat-icon { font-size: 1.8rem; margin-bottom: 6px; }
+  .stat-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.7rem;
+    color: var(--green-deep);
+    font-weight: 700;
+    line-height: 1;
+  }
+  .stat-label { font-size: 0.72rem; color: var(--text-light); margin-top: 3px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  /* TIPS */
+  .tip-card {
+    background: linear-gradient(135deg, rgba(45,80,22,0.06), rgba(126,179,86,0.1));
+    border: 1px solid rgba(74,124,47,0.2);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+
+  .tip-card h4 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--green-mid);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .tip-card p { font-size: 0.82rem; color: var(--text-mid); line-height: 1.5; }
+
+  /* HARVEST LOG */
+  .harvest-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(74,124,47,0.1);
+  }
+
+  .harvest-item:last-child { border-bottom: none; }
+
+  .harvest-plant-icon { font-size: 1.5rem; }
+
+  .harvest-details { flex: 1; }
+  .harvest-plant-name { font-weight: 500; font-size: 0.9rem; color: var(--text-dark); }
+  .harvest-date { font-size: 0.75rem; color: var(--text-light); }
+
+  .harvest-amount {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--earth);
+  }
+
+  /* BUTTONS */
+  .btn-primary {
+    background: linear-gradient(135deg, var(--green-soft), var(--green-mid));
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 13px 22px;
+    font-size: 0.9rem;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    width: 100%;
+    box-shadow: 0 4px 14px rgba(45,80,22,0.35);
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+  }
+
+  .btn-primary:active { transform: scale(0.98); }
+
+  .btn-secondary {
+    background: var(--card-bg);
+    color: #2d5016;
+    border: 1.5px solid rgba(45,80,22,0.5);
+    border-radius: 12px;
+    padding: 11px 20px;
+    font-size: 0.88rem;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--warm-white);
+    border-radius: 24px 24px 0 0;
+    padding: 24px 20px 40px;
+    width: 100%;
+    max-width: 480px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .modal-handle {
+    width: 36px; height: 4px;
+    background: rgba(0,0,0,0.12);
+    border-radius: 2px;
+    margin: 0 auto 20px;
+  }
+
+  .modal h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    color: var(--green-deep);
+    margin-bottom: 20px;
+    font-style: italic;
+  }
+
+  /* FORM */
+  .form-group { margin-bottom: 16px; }
+
+  .form-label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-mid);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 6px;
+  }
+
+  .form-input, .form-select, .form-textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid rgba(74,124,47,0.25);
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    color: var(--text-dark);
+    background: white;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+
+  .form-input:focus, .form-select:focus, .form-textarea:focus {
+    border-color: var(--green-soft);
+    box-shadow: 0 0 0 3px rgba(74,124,47,0.12);
+  }
+
+  .form-textarea { resize: vertical; min-height: 70px; }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .type-selector {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .type-option {
+    padding: 10px;
+    border: 1.5px solid rgba(74,124,47,0.2);
+    border-radius: 10px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    background: white;
+    color: var(--text-mid);
+  }
+
+  .type-option.selected {
+    border-color: var(--green-soft);
+    background: rgba(74,124,47,0.08);
+    color: var(--green-mid);
+  }
+
+  .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+  .modal-actions .btn-primary { flex: 2; }
+  .modal-actions .btn-secondary { flex: 1; }
+
+  /* WATERING SCHEDULE */
+  .watering-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(74,124,47,0.1);
+  }
+
+  .watering-row:last-child { border-bottom: none; }
+
+  .water-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .water-dot.today { background: #5ba3d9; }
+  .water-dot.tomorrow { background: var(--green-light); }
+  .water-dot.later { background: rgba(0,0,0,0.15); }
+
+  .watering-plant { flex: 1; }
+  .watering-plant-name { font-weight: 500; font-size: 0.9rem; }
+  .watering-when { font-size: 0.75rem; color: var(--text-light); }
+  .watering-freq { font-size: 0.78rem; color: var(--green-soft); font-weight: 500; }
+
+  /* NOTIFICATION BANNER */
+  .notif-banner {
+    background: linear-gradient(135deg, #5ba3d9, #3a7fb8);
+    color: white;
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .notif-banner .notif-icon { font-size: 1.5rem; }
+  .notif-banner h4 { font-size: 0.88rem; font-weight: 600; margin-bottom: 2px; }
+  .notif-banner p { font-size: 0.78rem; opacity: 0.88; }
+
+  /* PLANT DETAIL */
+  .detail-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .detail-emoji {
+    font-size: 3.5rem;
+    width: 80px; height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--green-pale), rgba(200,230,160,0.4));
+    border-radius: 20px;
+    box-shadow: 0 4px 16px rgba(74,124,47,0.25);
+    flex-shrink: 0;
+  }
+
+  .detail-info h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    color: var(--green-deep);
+    font-style: italic;
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .detail-item {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 12px;
+    text-align: center;
+  }
+
+  .detail-item-icon { font-size: 1.2rem; margin-bottom: 4px; }
+  .detail-item-label { font-size: 0.68rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 3px; }
+  .detail-item-value { font-size: 0.9rem; font-weight: 600; color: var(--text-dark); }
+
+  .seasonal-tip {
+    background: linear-gradient(135deg, rgba(74,124,47,0.08), rgba(126,179,86,0.12));
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    border: 1px solid rgba(74,124,47,0.15);
+  }
+
+  .seasonal-tip h4 { font-size: 0.82rem; color: var(--green-mid); font-weight: 600; margin-bottom: 5px; display: flex; align-items: center; gap: 6px; }
+  .seasonal-tip p { font-size: 0.82rem; color: var(--text-mid); line-height: 1.55; }
+
+  /* BACK BUTTON */
+  .back-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    color: #2d6e10;
+    cursor: pointer;
+    padding: 0;
+    margin-bottom: 16px;
+    font-weight: 600;
+  }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-light);
+  }
+
+  .empty-state .empty-icon { font-size: 3rem; margin-bottom: 12px; }
+  .empty-state h3 { font-family: 'Playfair Display', serif; font-size: 1.2rem; color: var(--text-mid); margin-bottom: 8px; }
+  .empty-state p { font-size: 0.85rem; line-height: 1.5; margin-bottom: 20px; }
+
+  /* HARVEST MODAL extras */
+  .harvest-mode-selector {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .harvest-mode-btn {
+    flex: 1;
+    padding: 10px;
+    border: 1.5px solid rgba(74,124,47,0.2);
+    border-radius: 10px;
+    background: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-mid);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+
+  .harvest-mode-btn.active {
+    border-color: var(--earth);
+    background: rgba(196,151,42,0.1);
+    color: var(--earth);
+  }
+
+  /* SEARCH */
+  .search-bar {
+    position: relative;
+    margin-bottom: 16px;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 12px 16px 12px 42px;
+    border: 1.5px solid rgba(74,124,47,0.2);
+    border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    background: var(--card-bg);
+    backdrop-filter: blur(8px);
+    outline: none;
+    color: var(--text-dark);
+    transition: border-color 0.2s;
+  }
+
+  .search-input:focus { border-color: var(--green-soft); }
+
+  .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1rem;
+    color: var(--text-light);
+  }
+
+  /* FILTER CHIPS */
+  .filter-chips {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    margin-bottom: 16px;
+    scrollbar-width: none;
+  }
+  .filter-chips::-webkit-scrollbar { display: none; }
+
+  .chip {
+    flex-shrink: 0;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1.5px solid rgba(74,124,47,0.22);
+    background: white;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--text-mid);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .chip.active {
+    background: var(--green-mid);
+    border-color: var(--green-mid);
+    color: white;
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--green-deep);
+    color: white;
+    padding: 12px 22px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    z-index: 300;
+    opacity: 0;
+    transition: all 0.3s;
+    white-space: nowrap;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* HEALTH BAR */
+  .health-bar-wrap { margin-top: 6px; }
+  .health-bar-label { font-size: 0.72rem; color: var(--text-light); margin-bottom: 3px; display: flex; justify-content: space-between; }
+  .health-bar {
+    height: 5px;
+    background: rgba(74,124,47,0.15);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .health-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--green-light), var(--green-soft));
+    transition: width 0.5s;
+  }
+
+  /* FAB */
+  .fab {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--green-light), var(--green-soft));
+    color: white;
+    border: none;
+    font-size: 1.6rem;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(45,80,22,0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    z-index: 50;
+  }
+
+  .fab:active { transform: scale(0.92); }
+
+  /* ANIMATIONS */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .plant-card { animation: fadeIn 0.35s ease both; }
+
+  /* SETTINGS */
+  .settings-section { margin-bottom: 24px; }
+  .settings-section h3 {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 10px;
+  }
+
+  .settings-row {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    box-shadow: 0 2px 10px var(--shadow);
+  }
+
+  .settings-row-left h4 { font-size: 0.9rem; font-weight: 500; color: var(--text-dark); }
+  .settings-row-left p { font-size: 0.78rem; color: var(--text-light); margin-top: 2px; }
+
+  .toggle {
+    width: 44px; height: 24px;
+    background: rgba(0,0,0,0.15);
+    border-radius: 12px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+
+  .toggle.on { background: var(--green-soft); }
+
+  .toggle::after {
+    content: '';
+    position: absolute;
+    width: 18px; height: 18px;
+    background: white;
+    border-radius: 50%;
+    top: 3px; left: 3px;
+    transition: transform 0.3s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+
+  .toggle.on::after { transform: translateX(20px); }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --cream: #111a0a;
+      --warm-white: #1a2510;
+      --card-bg: rgba(30,45,15,0.85);
+      --text-dark: #d4eab5;
+      --text-mid: #b8d48a;
+      --text-light: #8aad55;
+      --shadow: rgba(0,0,0,0.4);
+    }
+    .form-input, .form-select, .form-textarea { background: #1a2510; color: #d4eab5; }
+    .type-option, .harvest-mode-btn, .chip { background: #1a2510; color: #a0c472; }
+    .modal { background: #111a0a; }
+    .search-input { background: rgba(30,45,15,0.9); color: #d4eab5; }
+    .settings-row { background: rgba(30,45,15,0.9); }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="app-header">
+  <div class="header-inner">
+    <div class="header-title">🌿 Il Mio Giardino</div>
+    <div class="header-season" id="seasonDisplay">🌸 Primavera</div>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main class="main-content">
+
+  <!-- DASHBOARD -->
+  <section class="screen active" id="screen-home">
+    <h1 class="section-title">Buongiorno! 👋</h1>
+    <p class="section-sub" id="homeDate">Caricamento...</p>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">🌱</div>
+        <div class="stat-value" id="statPlants">0</div>
+        <div class="stat-label">Piante</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">💧</div>
+        <div class="stat-value" id="statWaterToday">0</div>
+        <div class="stat-label">Da bagnare oggi</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🧺</div>
+        <div class="stat-value" id="statHarvests">0</div>
+        <div class="stat-label">Raccolti totali</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⚖️</div>
+        <div class="stat-value" id="statWeight">0</div>
+        <div class="stat-label">Kg raccolti</div>
+      </div>
+    </div>
+
+    <!-- Season banner -->
+    <div class="season-banner" id="seasonBanner" data-icon="🌸">
+      <h3 id="seasonTitle">🌸 Consigli di Primavera</h3>
+      <p id="seasonAdvice">Caricamento...</p>
+    </div>
+
+    <!-- Today watering -->
+    <div class="card" id="todayWateringCard">
+      <h3 style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--green-deep);margin-bottom:12px;">💧 Irrigazione di oggi</h3>
+      <div id="todayWateringList"></div>
+    </div>
+
+    <!-- Quick tips -->
+    <div id="quickTips"></div>
+  </section>
+
+  <!-- GARDEN (plant list) -->
+  <section class="screen" id="screen-garden">
+    <h1 class="section-title">Il Giardino</h1>
+    <p class="section-sub">Tocca una pianta per i dettagli</p>
+
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" type="text" placeholder="Cerca pianta..." id="searchInput" oninput="filterPlants()">
+    </div>
+
+    <div class="filter-chips">
+      <div class="chip active" data-filter="all" onclick="setFilter(this,'all')">Tutte</div>
+      <div class="chip" data-filter="aromatic" onclick="setFilter(this,'aromatic')">🌿 Aromatiche</div>
+      <div class="chip" data-filter="fruit" onclick="setFilter(this,'fruit')">🍋 Da frutto</div>
+      <div class="chip" data-filter="flower" onclick="setFilter(this,'flower')">🌸 Fiori</div>
+      <div class="chip" data-filter="veggie" onclick="setFilter(this,'veggie')">🥦 Ortaggi</div>
+    </div>
+
+    <div id="plantList"></div>
+    <div id="emptyState" style="display:none;" class="empty-state">
+      <div class="empty-icon">🌱</div>
+      <h3>Nessuna pianta trovata</h3>
+      <p>Prova un altro filtro o aggiungi una nuova pianta!</p>
+    </div>
+  </section>
+
+  <!-- PLANT DETAIL -->
+  <section class="screen" id="screen-detail">
+    <button class="back-btn" onclick="goBack()">← Torna al giardino</button>
+    <div id="detailContent"></div>
+  </section>
+
+  <!-- RACCOLTI -->
+  <section class="screen" id="screen-harvests">
+    <h1 class="section-title">Raccolti</h1>
+    <p class="section-sub">Storico di tutto quello che hai raccolto</p>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">🧺</div>
+        <div class="stat-value" id="harvestCount">0</div>
+        <div class="stat-label">Totale raccolti</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⚖️</div>
+        <div class="stat-value" id="harvestWeight">0</div>
+        <div class="stat-label">Kg totali</div>
+      </div>
+    </div>
+
+    <div class="card" id="harvestListCard">
+      <h3 style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--green-deep);margin-bottom:12px;">📋 Storico raccolti</h3>
+      <div id="harvestList"></div>
+    </div>
+  </section>
+
+  <!-- IMPOSTAZIONI -->
+  <section class="screen" id="screen-settings">
+    <h1 class="section-title">Impostazioni</h1>
+    <p class="section-sub">Personalizza la tua esperienza</p>
+
+    <div class="settings-section">
+      <h3>Notifiche</h3>
+      <div class="settings-row">
+        <div class="settings-row-left">
+          <h4>💧 Promemoria irrigazione</h4>
+          <p>Ogni mattina alle 07:30</p>
+        </div>
+        <div class="toggle on" id="toggleWater" onclick="toggleSetting(this,'waterNotif')"></div>
+      </div>
+      <div class="settings-row">
+        <div class="settings-row-left">
+          <h4>🧺 Promemoria raccolto</h4>
+          <p>Quando è il momento di raccogliere</p>
+        </div>
+        <div class="toggle on" id="toggleHarvest" onclick="toggleSetting(this,'harvestNotif')"></div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3>Dati</h3>
+      <div class="settings-row" style="cursor:pointer;" onclick="exportData()">
+        <div class="settings-row-left">
+          <h4>📤 Esporta dati</h4>
+          <p>Scarica backup JSON</p>
+        </div>
+        <span style="font-size:1.2rem;">›</span>
+      </div>
+      <div class="settings-row" style="cursor:pointer;" onclick="if(confirm('Sei sicuro? I dati saranno eliminati!')){clearAllData()}">
+        <div class="settings-row-left">
+          <h4 style="color:var(--terracotta);">🗑️ Azzera tutti i dati</h4>
+          <p>Rimuove piante e raccolti</p>
+        </div>
+        <span style="font-size:1.2rem;">›</span>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3>Installazione PWA</h3>
+      <div class="card" style="text-align:center;padding:20px;">
+        <div style="font-size:2rem;margin-bottom:8px;">📱</div>
+        <h4 style="font-family:'Playfair Display',serif;color:var(--green-deep);margin-bottom:6px;">Installa sul telefono</h4>
+        <p style="font-size:0.82rem;color:var(--text-light);margin-bottom:14px;line-height:1.5;">Su Android: tocca ⋮ nel browser → "Aggiungi alla schermata Home"<br>Su iOS: tocca □↑ → "Aggiungi alla schermata Home"</p>
+        <button class="btn-secondary" onclick="showToast('Segui le istruzioni del browser! 📱')">Come installare</button>
+      </div>
+    </div>
+
+    <div style="text-align:center;padding:16px 0;font-size:0.75rem;color:var(--text-light);">
+      Il Mio Giardino v1.0 🌿<br>Dati salvati localmente sul dispositivo
+    </div>
+  </section>
+
+</main>
+
+<!-- FAB -->
+<button class="fab" id="fab" onclick="openAddModal()" title="Aggiungi pianta">＋</button>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-item active" onclick="navigate('home',this)">
+    <span class="nav-icon">🏡</span>Home
+  </button>
+  <button class="nav-item" onclick="navigate('garden',this)">
+    <span class="nav-icon">🌿</span>Giardino
+  </button>
+  <button class="nav-item" onclick="navigate('harvests',this)">
+    <span class="nav-icon">🧺</span>Raccolti
+  </button>
+  <button class="nav-item" onclick="navigate('settings',this)">
+    <span class="nav-icon">⚙️</span>Opzioni
+  </button>
+</nav>
+
+<!-- MODAL: AGGIUNGI PIANTA -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h2>🌱 Aggiungi Pianta</h2>
+
+    <div class="form-group">
+      <label class="form-label">Nome pianta</label>
+      <input class="form-input" type="text" id="newName" placeholder="Es. Basilico, Rosmarino...">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Tipo</label>
+      <div class="type-selector">
+        <div class="type-option selected" data-type="aromatic" onclick="selectType(this)">🌿 Aromatica</div>
+        <div class="type-option" data-type="fruit" onclick="selectType(this)">🍋 Da frutto</div>
+        <div class="type-option" data-type="flower" onclick="selectType(this)">🌸 Fiore</div>
+        <div class="type-option" data-type="veggie" onclick="selectType(this)">🥦 Ortaggio</div>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">💧 Ogni quanti giorni</label>
+        <input class="form-input" type="number" id="newWaterDays" placeholder="3" min="1" max="30">
+      </div>
+      <div class="form-group">
+        <label class="form-label">☀️ Esposizione</label>
+        <select class="form-select" id="newSun">
+          <option value="full">Pieno sole</option>
+          <option value="partial">Mezza ombra</option>
+          <option value="shade">Ombra</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">📅 Data messa a dimora</label>
+      <input class="form-input" type="date" id="newPlantDate">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">📝 Note</label>
+      <textarea class="form-textarea" id="newNotes" placeholder="Es. Posizione in giardino, caratteristiche..."></textarea>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('addModal')">Annulla</button>
+      <button class="btn-primary" onclick="addPlant()">Aggiungi 🌱</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: REGISTRA RACCOLTO -->
+<div class="modal-overlay" id="harvestModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h2>🧺 Registra Raccolto</h2>
+
+    <div class="form-group">
+      <label class="form-label">Pianta</label>
+      <select class="form-select" id="harvestPlant"></select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Modalità quantità</label>
+      <div class="harvest-mode-selector">
+        <button class="harvest-mode-btn active" onclick="setHarvestMode(this,'count')">🔢 Numero</button>
+        <button class="harvest-mode-btn" onclick="setHarvestMode(this,'weight')">⚖️ Peso (kg)</button>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" id="harvestAmountLabel">Quantità</label>
+        <input class="form-input" type="number" id="harvestAmount" placeholder="1" min="0" step="0.01">
+      </div>
+      <div class="form-group">
+        <label class="form-label">📅 Data</label>
+        <input class="form-input" type="date" id="harvestDate">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">📝 Note raccolto</label>
+      <textarea class="form-textarea" id="harvestNotes" placeholder="Qualità, meteo, osservazioni..."></textarea>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('harvestModal')">Annulla</button>
+      <button class="btn-primary" onclick="saveHarvest()">Salva 🧺</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// =====================
+// DATA & STATE
+// =====================
+let plants = [];
+let harvests = [];
+let settings = { waterNotif: true, harvestNotif: true };
+let currentFilter = 'all';
+let currentDetailId = null;
+let harvestMode = 'count';
+let previousScreen = 'garden';
+
+const PLANT_EMOJIS = {
+  aromatic: '🌿', fruit: '🍋', flower: '🌸', veggie: '🥦'
+};
+
+const TYPE_LABELS = {
+  aromatic: 'Aromatica', fruit: 'Da frutto', flower: 'Fiore/Ornamentale', veggie: 'Ortaggio'
+};
+
+const TYPE_BADGE = {
+  aromatic: 'badge-aromatic', fruit: 'badge-fruit', flower: 'badge-flower', veggie: 'badge-veggie'
+};
+
+// Custom emoji per pianta
+const PLANT_EMOJI_MAP = {
+  'basilico': '🌿', 'rosmarino': '🌿', 'timo': '🌿', 'salvia': '🌿',
+  'menta': '🌱', 'prezzemolo': '🌱', 'origano': '🌿', 'lavanda': '💜',
+  'limone': '🍋', 'arancio': '🍊', 'fico': '🍇', 'pesco': '🍑',
+  'melo': '🍎', 'pero': '🍐', 'ciliegio': '🍒', 'ulivo': '🫒',
+  'vite': '🍇', 'mandorlo': '🌸', 'melograno': '🍎',
+  'rosa': '🌹', 'geranio': '🌺', 'girasole': '🌻', 'tulipano': '🌷',
+  'ortensia': '💐', 'lavanda': '💜', 'iris': '🌸',
+  'pomodoro': '🍅', 'zucchina': '🥒', 'peperone': '🌶️', 'melanzana': '🍆',
+  'lattuga': '🥬', 'spinaci': '🥬', 'fagioli': '🫘', 'piselli': '🟢',
+  'carote': '🥕', 'cipolle': '🧅', 'aglio': '🧄', 'fragola': '🍓',
+};
+
+function getPlantEmoji(name, type) {
+  const key = name.toLowerCase().replace(/[^a-z]/g,'');
+  for (const [k, v] of Object.entries(PLANT_EMOJI_MAP)) {
+    if (key.includes(k)) return v;
+  }
+  return PLANT_EMOJIS[type] || '🌱';
+}
+
+// =====================
+// SEASON LOGIC
+// =====================
+function getCurrentSeason() {
+  const m = new Date().getMonth() + 1;
+  if (m >= 3 && m <= 5) return 'spring';
+  if (m >= 6 && m <= 8) return 'summer';
+  if (m >= 9 && m <= 11) return 'autumn';
+  return 'winter';
+}
+
+const SEASON_DATA = {
+  spring: {
+    label: '🌸 Primavera',
+    cls: 'season-spring',
+    icon: '🌸',
+    advice: 'Momento ideale per piantare aromatiche e fiori. Aumenta gradualmente l\'irrigazione. Controlla parassiti dopo le prime piogge.',
+    tips: [
+      { icon: '🌱', title: 'Semina primaverile', text: 'Pianifica semina di basilico, pomodori e peperoni. Le temperature miti favoriscono la germinazione.' },
+      { icon: '🐛', title: 'Controllo parassiti', text: 'Ispeziona le foglie per afidi e lumache. Usa metodi naturali come il sapone di Marsiglia diluito.' },
+      { icon: '✂️', title: 'Potatura', text: 'Ideale per potare rose e arbusti prima della fioritura. Rimuovi i rami secchi invernali.' }
+    ]
+  },
+  summer: {
+    label: '☀️ Estate',
+    cls: 'season-summer',
+    icon: '☀️',
+    advice: 'Irrigazione frequente nelle ore fresche (mattina o sera). Pacciamatura per ridurre l\'evaporazione. Raccogli erbe aromatiche regolarmente.',
+    tips: [
+      { icon: '💧', title: 'Irrigazione estiva', text: 'Innaffia presto la mattina o dopo il tramonto. Evita le ore più calde per non stressare le piante.' },
+      { icon: '🧺', title: 'Raccolto abbondante', text: 'Estate è la stagione dei raccolti! Frutta, pomodori, zucchine e aromatiche vanno raccolte spesso.' },
+      { icon: '🌡️', title: 'Protezione dal caldo', text: 'Installa ombreggianti per le piante più delicate. Le temperature oltre 35°C possono danneggiare i fiori.' }
+    ]
+  },
+  autumn: {
+    label: '🍂 Autunno',
+    cls: 'season-autumn',
+    icon: '🍂',
+    advice: 'Riduci l\'irrigazione. È il momento di piantare bulbi primaverili. Prepara le piante per l\'inverno con pacciamatura.',
+    tips: [
+      { icon: '🧅', title: 'Piantura bulbi', text: 'Pianta tulipani, narcisi e aglio autunnale per la fioritura primaverile.' },
+      { icon: '🍂', title: 'Compostaggio', text: 'Le foglie cadute sono oro per il giardino! Crea un cumulo di compost con foglie, sfalci e residui vegetali.' },
+      { icon: '❄️', title: 'Preparazione invernale', text: 'Proteggi le piante più delicate con tessuto non tessuto. Porta in casa le piante in vaso sensibili al gelo.' }
+    ]
+  },
+  winter: {
+    label: '❄️ Inverno',
+    cls: 'season-winter',
+    icon: '❄️',
+    advice: 'Riduci l\'irrigazione al minimo. Proteggi le piante dal gelo. Pianifica il giardino della prossima stagione.',
+    tips: [
+      { icon: '📋', title: 'Pianificazione', text: 'Pianifica il giardino della prossima stagione. Ordina semi e bulbi. Consulta un calendario lunare.' },
+      { icon: '🪴', title: 'Cura invernale', text: 'Annaffia solo quando il terreno è asciutto. Le piante in vaso necessitano di meno acqua in inverno.' },
+      { icon: '✂️', title: 'Potatura invernale', text: 'Potatura di alberi da frutto in stato di riposo. Rimuovi i rami malati o incrociati.' }
+    ]
+  }
+};
+
+function getWateringAdvice(plant, season) {
+  const base = {
+    spring: { aromatic: 'Ogni 3-4 giorni', fruit: 'Ogni 4-5 giorni', flower: 'Ogni 3-4 giorni', veggie: 'Ogni 2-3 giorni' },
+    summer: { aromatic: 'Ogni 1-2 giorni', fruit: 'Ogni 2-3 giorni', flower: 'Ogni 2 giorni', veggie: 'Ogni 1-2 giorni' },
+    autumn: { aromatic: 'Ogni 5-7 giorni', fruit: 'Ogni 6-8 giorni', flower: 'Ogni 5-6 giorni', veggie: 'Ogni 4-5 giorni' },
+    winter: { aromatic: 'Ogni 10-14 giorni', fruit: 'Ogni 12-15 giorni', flower: 'Ogni 10-12 giorni', veggie: 'Ogni 8-10 giorni' }
+  };
+  return base[season]?.[plant.type] || 'Varia';
+}
+
+function getSeasonalTip(plant, season) {
+  const tips = {
+    aromatic: {
+      spring: 'Momento ideale per rinvasare o dividere i cespi. Potare per stimolare una crescita più compatta.',
+      summer: 'Raccogliere regolarmente per evitare la fioritura precoce. Irrigare la mattina presto.',
+      autumn: 'Raccogliere e essiccare prima del freddo. Proteggere con telo non tessuto.',
+      winter: 'Portare in casa le aromatiche in vaso. Ridurre drasticamente l\'irrigazione.'
+    },
+    fruit: {
+      spring: 'Periodo di fioritura: evitare trattamenti. Controllare per eventuali parassiti.',
+      summer: 'Periodo di maturazione: thinning dei frutti se troppo fitti. Irrigazione regolare.',
+      autumn: 'Completare il raccolto. Potatura di pulizia dopo la caduta delle foglie.',
+      winter: 'Potatura principale degli alberi da frutto a riposo vegetativo. Trattamenti rameici.'
+    },
+    flower: {
+      spring: 'Eliminare i fiori appassiti per stimolare la rifiorenza. Concimazione con azoto.',
+      summer: 'Proteggere dal caldo eccessivo. Deadheading frequente per prolungare la fioritura.',
+      autumn: 'Raccogliere semi per l\'anno prossimo. Piantare bulbi autunnali.',
+      winter: 'Proteggere con pacciamatura. Pianificare le composizioni per la prossima stagione.'
+    },
+    veggie: {
+      spring: 'Semina in semenzaio al coperto. Trapianto a fine gelate.',
+      summer: 'Raccolta frequente stimola la produzione. Tutori per pomodori e fagioli.',
+      autumn: 'Ultimi raccolti estivi. Semina di ortaggi invernali (spinaci, valeriana).',
+      winter: 'Ortaggi resistenti al freddo: cavoli, radicchio, porri. Proteggere con tunnel.'
+    }
+  };
+  return tips[plant.type]?.[season] || 'Cura con attenzione in questa stagione.';
+}
+
+// =====================
+// DEFAULT PLANTS
+// =====================
+const DEFAULT_PLANTS = [
+  {
+    id: 'p1', name: 'Basilico', type: 'aromatic',
+    waterEveryDays: 2, sun: 'full',
+    plantDate: '2024-04-15', notes: 'Varietà genovese. In vaso sul terrazzo.',
+    lastWatered: null
+  },
+  {
+    id: 'p2', name: 'Rosmarino', type: 'aromatic',
+    waterEveryDays: 7, sun: 'full',
+    plantDate: '2023-03-10', notes: 'Arbusto grande, angolo soleggiato del giardino.',
+    lastWatered: null
+  },
+  {
+    id: 'p3', name: 'Limone', type: 'fruit',
+    waterEveryDays: 5, sun: 'full',
+    plantDate: '2022-05-20', notes: 'Varietà Femminello. In vaso grande, ricovero invernale.',
+    lastWatered: null
+  },
+  {
+    id: 'p4', name: 'Fico', type: 'fruit',
+    waterEveryDays: 10, sun: 'full',
+    plantDate: '2020-03-01', notes: 'Pianta adulta, angolo est. Ottima produzione.',
+    lastWatered: null
+  },
+  {
+    id: 'p5', name: 'Rosa', type: 'flower',
+    waterEveryDays: 4, sun: 'partial',
+    plantDate: '2023-10-05', notes: 'Rosa rampicante rossa. Su pergolato.',
+    lastWatered: null
+  },
+  {
+    id: 'p6', name: 'Lavanda', type: 'flower',
+    waterEveryDays: 8, sun: 'full',
+    plantDate: '2023-04-20', notes: 'Bordura giardino. Ottima per attirare api.',
+    lastWatered: null
+  }
+];
+
+// =====================
+// LOAD / SAVE
+// =====================
+function loadData() {
+  try {
+    plants = JSON.parse(localStorage.getItem('garden_plants') || 'null') || DEFAULT_PLANTS;
+    harvests = JSON.parse(localStorage.getItem('garden_harvests') || '[]');
+    settings = JSON.parse(localStorage.getItem('garden_settings') || 'null') || settings;
+  } catch(e) {
+    plants = DEFAULT_PLANTS; harvests = []; 
+  }
+}
+
+function saveData() {
+  localStorage.setItem('garden_plants', JSON.stringify(plants));
+  localStorage.setItem('garden_harvests', JSON.stringify(harvests));
+  localStorage.setItem('garden_settings', JSON.stringify(settings));
+}
+
+// =====================
+// NAVIGATION
+// =====================
+function navigate(screen, navBtn) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const s = document.getElementById('screen-' + screen);
+  if (s) s.classList.add('active');
+  if (navBtn) navBtn.classList.add('active');
+
+  const fab = document.getElementById('fab');
+  fab.style.display = (screen === 'garden' || screen === 'home') ? 'flex' : 'none';
+
+  if (screen === 'home') renderHome();
+  if (screen === 'garden') renderPlantList();
+  if (screen === 'harvests') renderHarvests();
+}
+
+function showDetail(plantId) {
+  previousScreen = 'garden';
+  currentDetailId = plantId;
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-detail').classList.add('active');
+  document.getElementById('fab').style.display = 'none';
+  renderDetail(plantId);
+}
+
+function goBack() {
+  navigate(previousScreen, document.querySelector('.nav-item:nth-child(2)'));
+  renderPlantList();
+}
+
+// =====================
+// RENDER HOME
+// =====================
+function renderHome() {
+  const season = getCurrentSeason();
+  const sd = SEASON_DATA[season];
+  const today = new Date();
+
+  document.getElementById('homeDate').textContent =
+    today.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+  // Season banner
+  const banner = document.getElementById('seasonBanner');
+  banner.className = 'season-banner ' + sd.cls;
+  banner.setAttribute('data-icon', sd.icon);
+  document.getElementById('seasonTitle').textContent = sd.label;
+  document.getElementById('seasonAdvice').textContent = sd.advice;
+
+  // Season display header
+  document.getElementById('seasonDisplay').textContent = sd.label;
+
+  // Stats
+  document.getElementById('statPlants').textContent = plants.length;
+
+  // Who needs water today
+  const needWater = plants.filter(p => needsWaterToday(p));
+  document.getElementById('statWaterToday').textContent = needWater.length;
+  document.getElementById('statHarvests').textContent = harvests.length;
+
+  const totalKg = harvests
+    .filter(h => h.mode === 'weight')
+    .reduce((sum, h) => sum + parseFloat(h.amount || 0), 0);
+  document.getElementById('statWeight').textContent = totalKg.toFixed(1);
+
+  // Today watering list
+  const wl = document.getElementById('todayWateringList');
+  if (needWater.length === 0) {
+    wl.innerHTML = '<p style="font-size:0.85rem;color:var(--text-light);text-align:center;padding:8px 0;">✅ Nessuna pianta da bagnare oggi!</p>';
+  } else {
+    wl.innerHTML = needWater.map(p => `
+      <div class="watering-row">
+        <div class="water-dot today"></div>
+        <div class="watering-plant">
+          <div class="watering-plant-name">${getPlantEmoji(p.name,p.type)} ${p.name}</div>
+          <div class="watering-when">Oggi · ogni ${p.waterEveryDays} giorni</div>
+        </div>
+        <button class="btn-water" onclick="waterPlant('${p.id}',event)">Bagnata ✓</button>
+      </div>
+    `).join('');
+  }
+
+  // Tips
+  const tipsEl = document.getElementById('quickTips');
+  tipsEl.innerHTML = sd.tips.map(t => `
+    <div class="tip-card">
+      <h4>${t.icon} ${t.title}</h4>
+      <p>${t.text}</p>
+    </div>
+  `).join('');
+}
+
+// =====================
+// WATERING LOGIC
+// =====================
+function daysSinceWatered(plant) {
+  if (!plant.lastWatered) return Infinity;
+  // Confronto su date pure (YYYY-MM-DD) senza fuso orario
+  const todayStr = new Date().toISOString().split('T')[0];
+  const [ty, tm, td] = todayStr.split('-').map(Number);
+  const [ly, lm, ld] = plant.lastWatered.split('-').map(Number);
+  const today = new Date(ty, tm - 1, td);
+  const last  = new Date(ly, lm - 1, ld);
+  return Math.floor((today - last) / (1000 * 60 * 60 * 24));
+}
+
+function needsWaterToday(plant) {
+  return daysSinceWatered(plant) >= plant.waterEveryDays;
+}
+
+function daysUntilWater(plant) {
+  const elapsed = daysSinceWatered(plant);
+  if (elapsed === Infinity) return 0;
+  return Math.max(0, plant.waterEveryDays - elapsed);
+}
+
+function waterPlant(plantId, event) {
+  if (event) event.stopPropagation();
+  const p = plants.find(x => x.id === plantId);
+  if (p) {
+    p.lastWatered = new Date().toISOString().split('T')[0];
+    saveData();
+    showToast(`💧 ${p.name} bagnata!`);
+    renderHome();
+    if (document.getElementById('screen-detail').classList.contains('active')) {
+      renderDetail(plantId);
+    }
+  }
+}
+
+// =====================
+// RENDER PLANT LIST
+// =====================
+function renderPlantList() {
+  const search = (document.getElementById('searchInput')?.value || '').toLowerCase();
+  let filtered = plants.filter(p => {
+    const matchFilter = currentFilter === 'all' || p.type === currentFilter;
+    const matchSearch = !search || p.name.toLowerCase().includes(search);
+    return matchFilter && matchSearch;
+  });
+
+  const list = document.getElementById('plantList');
+  const empty = document.getElementById('emptyState');
+
+  if (filtered.length === 0) {
+    list.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  const season = getCurrentSeason();
+  list.innerHTML = filtered.map((p, i) => {
+    const days = daysUntilWater(p);
+    const needsWater = days === 0;
+    return `
+    <div class="card plant-card" style="animation-delay:${i*0.05}s" onclick="showDetail('${p.id}')">
+      <div class="plant-emoji">${getPlantEmoji(p.name,p.type)}</div>
+      <div class="plant-info">
+        <div class="plant-name">${p.name}</div>
+        <span class="plant-type-badge ${TYPE_BADGE[p.type]}">${TYPE_LABELS[p.type]}</span>
+        <div class="plant-watering">
+          ${needsWater
+            ? `<span style="color:#5ba3d9;font-weight:600;">💧 Da bagnare oggi!</span>`
+            : `💧 Tra ${days} giorn${days===1?'o':'i'}`
+          }
+        </div>
+        <div class="health-bar-wrap">
+          <div class="health-bar"><div class="health-bar-fill" style="width:${getHealthPercent(p)}%"></div></div>
+        </div>
+      </div>
+      <div class="plant-actions" onclick="event.stopPropagation()">
+        <button class="btn-water" onclick="waterPlant('${p.id}',event)">💧 Bagna</button>
+        <button class="btn-harvest" onclick="openHarvestModal('${p.id}',event)">🧺 Raccogli</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function getHealthPercent(plant) {
+  const days = daysUntilWater(plant);
+  if (!plant.lastWatered) return 40;
+  return Math.min(100, Math.round((days / plant.waterEveryDays) * 100));
+}
+
+function filterPlants() { renderPlantList(); }
+
+function setFilter(el, filter) {
+  currentFilter = filter;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderPlantList();
+}
+
+// =====================
+// RENDER DETAIL
+// =====================
+function renderDetail(plantId) {
+  const p = plants.find(x => x.id === plantId);
+  if (!p) return;
+  const season = getCurrentSeason();
+  const seasonLabel = SEASON_DATA[season].label;
+  const waterDays = daysUntilWater(p);
+  const plantHarvests = harvests.filter(h => h.plantId === plantId);
+  const totalHarvests = plantHarvests.length;
+  const totalKg = plantHarvests.filter(h=>h.mode==='weight').reduce((s,h)=>s+parseFloat(h.amount||0),0);
+  const seasonTip = getSeasonalTip(p, season);
+  const wateringAdvice = getWateringAdvice(p, season);
+
+  const sunMap = { full: '☀️ Pieno sole', partial: '⛅ Mezza ombra', shade: '🌥️ Ombra' };
+
+  document.getElementById('detailContent').innerHTML = `
+    <div class="detail-header">
+      <div class="detail-emoji">${getPlantEmoji(p.name,p.type)}</div>
+      <div class="detail-info">
+        <div class="plant-type-badge ${TYPE_BADGE[p.type]}" style="margin-bottom:6px">${TYPE_LABELS[p.type]}</div>
+        <h2>${p.name}</h2>
+        <div style="font-size:0.8rem;color:var(--text-light);margin-top:4px">
+          ${p.plantDate ? 'Piantata il ' + new Date(p.plantDate).toLocaleDateString('it-IT') : ''}
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-grid">
+      <div class="detail-item">
+        <div class="detail-item-icon">💧</div>
+        <div class="detail-item-label">Prossima annaffiatura</div>
+        <div class="detail-item-value" style="${waterDays===0?'color:#5ba3d9':''}">${waterDays===0?'Oggi!':waterDays+' giorni'}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-item-icon">📅</div>
+        <div class="detail-item-label">Frequenza</div>
+        <div class="detail-item-value">Ogni ${p.waterEveryDays}gg</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-item-icon">☀️</div>
+        <div class="detail-item-label">Esposizione</div>
+        <div class="detail-item-value" style="font-size:0.8rem">${sunMap[p.sun]||'—'}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-item-icon">🧺</div>
+        <div class="detail-item-label">Raccolti</div>
+        <div class="detail-item-value">${totalHarvests}${totalKg>0?' ('+totalKg.toFixed(1)+'kg)':''}</div>
+      </div>
+    </div>
+
+    <div class="seasonal-tip">
+      <h4>🌡️ Consigli per ${seasonLabel}</h4>
+      <p>${seasonTip}</p>
+    </div>
+
+    <div class="seasonal-tip" style="background:linear-gradient(135deg,rgba(91,163,217,0.08),rgba(58,127,184,0.12));border-color:rgba(91,163,217,0.2);">
+      <h4>💧 Irrigazione stagionale</h4>
+      <p>${wateringAdvice} — ${getWateringDetail(p, season)}</p>
+    </div>
+
+    ${p.notes ? `<div class="seasonal-tip" style="background:rgba(0,0,0,0.03);border-color:rgba(0,0,0,0.08);">
+      <h4>📝 Note</h4>
+      <p>${p.notes}</p>
+    </div>` : ''}
+
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn-water" style="padding:13px;font-size:0.9rem;border-radius:12px;flex:1;" onclick="waterPlant('${p.id}',event)">💧 Bagna ora</button>
+      <button class="btn-harvest" style="padding:13px;font-size:0.9rem;border-radius:12px;flex:1;" onclick="openHarvestModal('${p.id}',event)">🧺 Raccogli</button>
+    </div>
+    <button class="btn-secondary" style="width:100%;margin-top:10px;color:#b03010;border-color:rgba(176,48,16,0.4);font-weight:600;" onclick="deletePlant('${p.id}')">🗑️ Rimuovi pianta</button>
+  `;
+}
+
+function getWateringDetail(plant, season) {
+  const details = {
+    spring: 'Preferibilmente la mattina. Evita ristagni.',
+    summer: 'Mattina presto o sera tardi. Pacciama per mantenere l\'umidità.',
+    autumn: 'Riduci con l\'abbassarsi delle temperature. Controlla il terreno prima.',
+    winter: 'Annaffia solo se il terreno è completamente asciutto.'
+  };
+  return details[season];
+}
+
+// =====================
+// ADD PLANT
+// =====================
+let selectedType = 'aromatic';
+
+function openAddModal() {
+  document.getElementById('newName').value = '';
+  document.getElementById('newWaterDays').value = '';
+  document.getElementById('newNotes').value = '';
+  document.getElementById('newPlantDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('newSun').value = 'full';
+  selectedType = 'aromatic';
+  document.querySelectorAll('.type-option').forEach(o => o.classList.remove('selected'));
+  document.querySelector('[data-type="aromatic"]').classList.add('selected');
+  document.getElementById('addModal').classList.add('open');
+}
+
+function selectType(el) {
+  document.querySelectorAll('.type-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedType = el.getAttribute('data-type');
+}
+
+function addPlant() {
+  const name = document.getElementById('newName').value.trim();
+  if (!name) { showToast('⚠️ Inserisci il nome della pianta'); return; }
+
+  const defaults = { aromatic: 3, fruit: 5, flower: 4, veggie: 2 };
+  const waterDays = parseInt(document.getElementById('newWaterDays').value) || defaults[selectedType];
+
+  const newPlant = {
+    id: 'p' + Date.now(),
+    name,
+    type: selectedType,
+    waterEveryDays: waterDays,
+    sun: document.getElementById('newSun').value,
+    plantDate: document.getElementById('newPlantDate').value,
+    notes: document.getElementById('newNotes').value.trim(),
+    lastWatered: null
+  };
+
+  plants.push(newPlant);
+  saveData();
+  closeModal('addModal');
+  showToast(`🌱 ${name} aggiunta al giardino!`);
+  renderPlantList();
+  renderHome();
+}
+
+function deletePlant(plantId) {
+  if (!confirm('Rimuovere questa pianta dal giardino?')) return;
+  plants = plants.filter(p => p.id !== plantId);
+  saveData();
+  showToast('🗑️ Pianta rimossa');
+  goBack();
+}
+
+// =====================
+// HARVESTS
+// =====================
+function openHarvestModal(plantId, event) {
+  if (event) event.stopPropagation();
+  const sel = document.getElementById('harvestPlant');
+  sel.innerHTML = plants.map(p => `<option value="${p.id}" ${p.id===plantId?'selected':''}>${getPlantEmoji(p.name,p.type)} ${p.name}</option>`).join('');
+  document.getElementById('harvestAmount').value = '';
+  document.getElementById('harvestNotes').value = '';
+  document.getElementById('harvestDate').value = new Date().toISOString().split('T')[0];
+  harvestMode = 'count';
+  document.querySelectorAll('.harvest-mode-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.harvest-mode-btn').classList.add('active');
+  document.getElementById('harvestAmountLabel').textContent = 'Numero pezzi';
+  document.getElementById('harvestModal').classList.add('open');
+}
+
+function setHarvestMode(el, mode) {
+  harvestMode = mode;
+  document.querySelectorAll('.harvest-mode-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('harvestAmountLabel').textContent = mode === 'weight' ? 'Peso (kg)' : 'Numero pezzi';
+  document.getElementById('harvestAmount').placeholder = mode === 'weight' ? '0.5' : '1';
+}
+
+function saveHarvest() {
+  const plantId = document.getElementById('harvestPlant').value;
+  const amount = document.getElementById('harvestAmount').value;
+  if (!amount) { showToast('⚠️ Inserisci la quantità'); return; }
+
+  const plant = plants.find(p => p.id === plantId);
+  const h = {
+    id: 'h' + Date.now(),
+    plantId,
+    plantName: plant?.name || '',
+    plantType: plant?.type || '',
+    mode: harvestMode,
+    amount: parseFloat(amount),
+    date: document.getElementById('harvestDate').value,
+    notes: document.getElementById('harvestNotes').value.trim()
+  };
+
+  harvests.unshift(h);
+  saveData();
+  closeModal('harvestModal');
+  const unit = harvestMode === 'weight' ? 'kg' : (amount > 1 ? ' pezzi' : ' pezzo');
+  showToast(`🧺 Raccolto registrato: ${amount}${unit}!`);
+  renderHome();
+}
+
+function renderHarvests() {
+  const count = harvests.length;
+  const totalKg = harvests.filter(h=>h.mode==='weight').reduce((s,h)=>s+parseFloat(h.amount||0),0);
+  document.getElementById('harvestCount').textContent = count;
+  document.getElementById('harvestWeight').textContent = totalKg.toFixed(1);
+
+  const list = document.getElementById('harvestList');
+  if (harvests.length === 0) {
+    list.innerHTML = '<div class="empty-state" style="padding:20px 0"><div class="empty-icon">🧺</div><p>Nessun raccolto ancora.<br>Inizia a registrare i tuoi frutti!</p></div>';
+    return;
+  }
+
+  list.innerHTML = harvests.map(h => {
+    const plant = plants.find(p => p.id === h.plantId);
+    const emoji = plant ? getPlantEmoji(plant.name, plant.type) : '🌱';
+    const dateStr = h.date ? new Date(h.date).toLocaleDateString('it-IT', {day:'numeric',month:'short',year:'numeric'}) : '';
+    const unit = h.mode === 'weight' ? ' kg' : (h.amount > 1 ? ' pz' : ' pz');
+    return `
+    <div class="harvest-item">
+      <div class="harvest-plant-icon">${emoji}</div>
+      <div class="harvest-details">
+        <div class="harvest-plant-name">${h.plantName}</div>
+        <div class="harvest-date">${dateStr}${h.notes ? ' · ' + h.notes : ''}</div>
+      </div>
+      <div class="harvest-amount">${h.amount}${unit}</div>
+    </div>`;
+  }).join('');
+}
+
+// =====================
+// SETTINGS
+// =====================
+function toggleSetting(el, key) {
+  el.classList.toggle('on');
+  settings[key] = el.classList.contains('on');
+  saveData();
+  if (key === 'waterNotif' && settings[key]) {
+    requestNotifPermission();
+  }
+}
+
+function exportData() {
+  const data = { plants, harvests, exported: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'giardino_backup.json';
+  a.click();
+  showToast('📤 Backup esportato!');
+}
+
+function clearAllData() {
+  plants = []; harvests = [];
+  saveData();
+  showToast('🗑️ Dati azzerati');
+  renderHome();
+}
+
+
+// =====================
+// NOTIFICATIONS
+// =====================
+function getNotifAPI() {
+  try {
+    if (typeof window === 'undefined') return null;
+    var N = window['Notification'];
+    return (N && typeof N.requestPermission === 'function') ? N : null;
+  } catch(e) { return null; }
+}
+
+function requestNotifPermission() {
+  var N = getNotifAPI();
+  if (!N) { showToast('⚠️ Notifiche non supportate in questo browser'); return; }
+  try {
+    N.requestPermission().then(function(perm) {
+      if (perm === 'granted') {
+        scheduleWateringNotification();
+        showToast('🔔 Notifiche attivate! Riceverai promemoria alle 07:30');
+      } else {
+        showToast('⚠️ Permesso notifiche negato');
+      }
+    });
+  } catch(e) { showToast('⚠️ Notifiche non disponibili'); }
+}
+
+function fireWateringNotification() {
+  try {
+    var N = getNotifAPI();
+    if (!N || N.permission !== 'granted') return;
+    var toWater = plants.filter(needsWaterToday);
+    var title, body;
+    if (toWater.length > 0) {
+      var plantLines = toWater.map(function(p) {
+        var overdue = daysSinceWatered(p) - p.waterEveryDays;
+        return overdue > 0
+          ? getPlantEmoji(p.name, p.type) + ' ' + p.name + ' (in ritardo di ' + overdue + 'gg)'
+          : getPlantEmoji(p.name, p.type) + ' ' + p.name;
+      });
+      title = '💧 Il Mio Giardino — Ora di annaffiare!';
+      body = toWater.length + ' pianta' + (toWater.length > 1 ? 'e' : '') + ' da bagnare oggi:\n' + plantLines.join('\n');
+    } else {
+      title = '🌿 Il Mio Giardino — Tutto a posto!';
+      body = 'Nessuna pianta da bagnare oggi. Buona giornata!';
+    }
+    new N(title, { body: body, tag: 'watering-reminder', requireInteraction: toWater.length > 0 });
+  } catch(e) { /* notifiche non disponibili nell ambiente corrente */ }
+}
+
+function scheduleWateringNotification() {
+  var N = getNotifAPI();
+  if (!N || N.permission !== 'granted') return;
+  var now = new Date();
+  var target = new Date();
+  target.setHours(7, 30, 0, 0);
+  if (target <= now) target.setDate(target.getDate() + 1);
+  var delay = target - now;
+  setTimeout(function() {
+    fireWateringNotification();
+    setTimeout(scheduleWateringNotification, 24 * 60 * 60 * 1000);
+  }, delay);
+}
+
+// =====================
+// UTILS
+// =====================
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
+});
+
+// =====================
+// INIT
+// =====================
+loadData();
+renderHome();
+renderPlantList();
+
+// Auto-request notifications (solo su browser reali)
+setTimeout(function() {
+  var N = getNotifAPI();
+  if (!N) return;
+  if (settings.waterNotif && N.permission === 'default') {
+    requestNotifPermission();
+  } else if (settings.waterNotif && N.permission === 'granted') {
+    scheduleWateringNotification();
+  }
+}, 2000);
+</script>
+</body>
+</html>
